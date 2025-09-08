@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}I miei Ordini — Wasabi{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">I miei Ordini</h1>
+
+  {% if ordini %}
+      <div class="list-group">
+          {% for ordine in ordini %}
+          <a href="{% url 'takeaway:ordine' ordine.id %}" class="list-group-item list-group-item-action mb-2">
+              <div class="d-flex justify-content-between">
+                  <div>
+                      <strong>Ordine #{{ ordine.id }}</strong><br>
+                      Stato: {{ ordine.get_stato_display }}<br>
+                      Ritiro: {{ ordine.orario_ritiro|date:"d/m/Y H:i" }}
+                  </div>
+                  <div class="text-end">
+                      Totale: {{ ordine.totale|floatformat:2 }} &euro;
+                  </div>
+              </div>
+          </a>
+          {% endfor %}
+      </div>
+  {% else %}
+      <p>Non hai ancora effettuato ordini.</p>
+  {% endif %}
+
+{% endblock %}

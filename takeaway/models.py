@@ -1,0 +1,92 @@
+from django.contrib.auth.models import User
+from django.db import models
+
+ORDINE_PORTATA = {
+        'antipasto': 1,
+        'primo': 2,
+        'secondo': 3,
+        'dessert': 4,
+    }
+
+class Piatto(models.Model):
+    PORTATA_CHOICES = [
+        ('antipasto', 'Antipasto'),
+        ('primo', 'Primo'),
+        ('secondo', 'Secondo'),
+        ('dessert', 'Dessert'),
+    ]
+
+    INGREDIENTI_CHOICES = [
+        ('carne', 'Carne'),
+        ('pesce', 'Pesce'),
+        ('vegano', 'Vegano'),
+        ('vegetariano', 'Vegetariano'),
+    ]
+
+    nome = models.CharField(max_length=100)
+    descrizione = models.TextField()
+    prezzo = models.DecimalField(max_digits=6, decimal_places=2)
+    portata = models.CharField(max_length=20, choices=PORTATA_CHOICES, default='primo')
+    ingredienti = models.CharField(max_length=20, choices=INGREDIENTI_CHOICES, default='carne')
+    foto = models.ImageField(upload_to='piatti/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.nome} - {self.portata} ({self.prezzo} €)"
+
+    class Meta:
+        verbose_name_plural = "Piatti"
+
+    @property
+    def portata_ordine(self):
+        return ORDINE_PORTATA[self.portata]
+
+
+class Carrello(models.Model):
+    cliente = models.OneToOneField(User, on_delete=models.CASCADE)  # Un carrello per cliente
+
+    def totale(self):
+        return sum(piatto.subtotale() for piatto in self.piatti.all())
+
+    def __str__(self):
+        return f"Carrello di {self.cliente.username}"
+
+
+class PiattoCarrello(models.Model):
+    carrello = models.ForeignKey(Carrello, related_name="piatti", on_delete=models.CASCADE)
+    piatto = models.ForeignKey(Piatto, on_delete=models.CASCADE)
+    quantita = models.PositiveIntegerField(default=1)
+
+    def subtotale(self):
+        return self.piatto.prezzo * self.quantita
+
+
+class Ordine(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'In attesa'),
+        ('completed', 'Completato'),
+        ('cancelled', 'Cancellato'),
+    ]
+
+    cliente = models.ForeignKey(User, on_delete=models.CASCADE)
+    orario_ritiro = models.DateTimeField()
+    stato = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    creato_il = models.DateTimeField(auto_now_add=True)
+
+    def totale(self):
+        return sum(piatto.subtotale() for piatto in self.piatti.all())
+
+    def __str__(self):
+        return f"Ordine #{self.id} di {self.cliente.username}"
+
+
+class PiattoOrdine(models.Model):
+    ordine = models.ForeignKey(Ordine, related_name="piatti", on_delete=models.CASCADE)
+    piatto = models.ForeignKey(Piatto, on_delete=models.CASCADE)
+    quantita = models.PositiveIntegerField(default=1)
+    prezzo_unitario = models.DecimalField(max_digits=6, decimal_places=2)
+
+    def subtotale(self):
+        return self.prezzo_unitario * self.quantita
+
+    def __str__(self):
+        return f"{self.quantita} × {self.piatto.nome} (Ordine #{self.ordine.id})"

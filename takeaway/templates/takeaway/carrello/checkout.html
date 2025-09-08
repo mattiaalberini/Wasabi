@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Checkout — Wasabi{% endblock %}
+
+{% block content %}
+
+  <div class="container py-5">
+    <h2 class="mb-4 text-center">Checkout</h2>
+
+    <h4>Riepilogo Carrello</h4>
+    <ul class="list-group mb-4">
+        {% for item in piatti %}
+        <li class="list-group-item d-flex justify-content-between">
+            {{ item.piatto.nome }} × {{ item.quantita }}
+            <span>{{ item.piatto.prezzo|floatformat:2 }} &euro;</span>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-success btn-lg">Conferma Ordine</button>
+        </div>
+    </form>
+  </div>
+
+{% endblock %}

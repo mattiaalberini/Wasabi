@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Menu — Wasabi{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Menu</h1>
+
+  <form method="get" id="filterForm" class="row g-2 mb-4">
+    <div class="col-md-2">
+      <select name="portata" class="form-select" onchange="document.getElementById('filterForm').submit()">
+        <option value="tutti" {% if portata_selezionata == "tutti" %}selected{% endif %}>Tutte le portate</option>
+        <option value="antipasto" {% if portata_selezionata == "antipasto" %}selected{% endif %}>Antipasti</option>
+        <option value="primo" {% if portata_selezionata == "primo" %}selected{% endif %}>Primi</option>
+        <option value="secondo" {% if portata_selezionata == "secondo" %}selected{% endif %}>Secondi</option>
+        <option value="dessert" {% if portata_selezionata == "dessert" %}selected{% endif %}>Dessert</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <select name="ingrediente" class="form-select" onchange="document.getElementById('filterForm').submit()">
+        <option value="tutti" {% if ingrediente_selezionato == "tutti" %}selected{% endif %}>Tutti i tipi</option>
+        <option value="carne" {% if ingrediente_selezionato == "carne" %}selected{% endif %}>Carne</option>
+        <option value="pesce" {% if ingrediente_selezionato == "pesce" %}selected{% endif %}>Pesce</option>
+        <option value="vegano" {% if ingrediente_selezionato == "vegano" %}selected{% endif %}>Vegano</option>
+        <option value="vegetariano" {% if ingrediente_selezionato == "vegetariano" %}selected{% endif %}>Vegetariano</option>
+      </select>
+    </div>
+  </form>
+
+
+  {% if object_list %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for piatto in object_list %}
+      <div class="col">
+        <div class="card h-10">
+          {% if piatto.foto %}
+            <img src="{{ piatto.foto.url }}" class="card-img-top" alt="{{ piatto.nome }}">
+          {% else %}
+            <img src="{% static 'imgs/noimage.jpg' %}" class="card-img-top" alt="Nessuna immagine">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ piatto.nome }}</h5>
+            <p class="card-text">{{ piatto.descrizione|truncatewords:20 }}</p>
+            <p>
+              <span class="badge bg-info text-dark">{{ piatto.get_portata_display }}</span>
+              <span class="badge bg-secondary">{{ piatto.get_ingredienti_display }}</span>
+              <a href="{% url 'takeaway:piatto' piatto.pk %}" class="btn btn-sm btn-success float-end">Mostra di più</a>
+            </p>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="fw-bold">{{ piatto.prezzo }} &euro;</span>
+
+            {% if "Clienti" in user.groups.all.0.name %}
+              <a href="{% url 'takeaway:carrello_add' piatto.pk %}" class="btn btn-sm btn-success">Aggiungi al carrello</a>
+            {% endif %}
+
+            {% if "Dipendenti" in user.groups.all.0.name %}
+              <a href="{% url 'takeaway:piatto_update' piatto.pk %}" class="btn btn-sm btn-outline-primary">✏️</a>
+              <a href="{% url 'takeaway:piatto_delete' piatto.pk %}" class="btn btn-sm btn-outline-danger">🗑️</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Nessun piatto disponibile al momento. Torna più tardi!</p>
+  {% endif %}
+{% endblock %}

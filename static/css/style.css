@@ -1,0 +1,100 @@
+/* ====== Stile generale ====== */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fafafa;
+  color: #333;
+}
+
+/* ====== Navbar ====== */
+.navbar {
+  background-color: #111 !important;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: #e63946 !important;
+}
+
+.navbar-nav .nav-link {
+  color: #ddd !important;
+  transition: color 0.2s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #e63946 !important;
+}
+
+/* ====== Titoli ====== */
+h1, h2, h3, h4, h5 {
+  font-family: 'Georgia', serif;
+  color: #222;
+}
+
+/* ====== Card dei piatti ====== */
+.card {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 310px;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.card-title {
+  color: #e63946;
+  font-weight: bold;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 47%;       /* Altezza fissa per il quadrato */
+  object-fit: cover;   /* Taglia e adatta l'immagine */
+}
+
+.card-body {
+  height: 40%;
+}
+
+.card-footer {
+  background-color: #f8f9fa;
+  height: 13%;
+}
+
+/* ====== Bottone principale ====== */
+.btn-success {
+  background-color: #e63946;
+  border-color: #e63946;
+}
+
+.btn-success:hover {
+  background-color: #c71f2d;
+  border-color: #c71f2d;
+}
+
+/* ====== Footer ====== */
+footer {
+  font-size: 0.9rem;
+  background-color: #111;
+  color: #aaa;
+}
+
+/* Rimuove tutti gli stili del button */
+.logout-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;           /* usa lo stesso font degli altri link */
+    color: inherit;          /* usa lo stesso colore degli altri link */
+    cursor: pointer;
+    line-height: inherit;    /* stessa altezza di linea del link */
+    vertical-align: baseline; /* allinea verticalmente al testo */
+}
+.logout-form {
+    display: inline;
+}

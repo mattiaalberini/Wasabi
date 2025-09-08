@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}{{ piatto.nome }} — Wasabi{% endblock %}
+
+{% block content %}
+<div class="container mt-4 py-5">
+    <div class="row d-flex align-items-stretch">
+        <!-- Colonna sinistra: foto -->
+        <div class="col-md-4 d-flex">
+            {% if piatto.foto %}
+                <img src="{{ piatto.foto.url }}" alt="{{ piatto.nome }}" class="img-fluid rounded" style="object-fit: cover; width: 100%;">
+            {% else %}
+                <img src="{% static 'imgs/noimage.jpg' %}" class="img-fluid rounded" alt="Nessuna immagine">
+            {% endif %}
+        </div>
+
+        <!-- Colonna destra: dettagli centrati -->
+        <div class="col-md-8 d-flex flex-column justify-content-center align-items-center text-center">
+            <h1>{{ piatto.nome }}</h1>
+
+            <div class="mb-2">
+                <strong>Descrizione:</strong>
+                <p>{{ piatto.descrizione }}</p>
+            </div>
+
+            <div class="mb-2">
+                <strong>Prezzo:</strong>
+                <p>{{ piatto.prezzo }} €</p>
+            </div>
+
+            <div class="mb-2">
+                <strong>Portata:</strong>
+                <p>{{ piatto.get_portata_display }}</p>
+            </div>
+
+            <div class="mb-2">
+                <strong>Ingredienti:</strong>
+                <p>{{ piatto.get_ingredienti_display }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

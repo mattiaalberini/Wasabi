@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Carrello — Wasabi{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Carrello</h1>
+
+  {% if carrello.piatti.all %}
+    <table class="table">
+      <tr>
+        <th>Piatto</th>
+        <th>Quantità</th>
+        <th>Prezzo</th>
+        <th>Totale</th>
+        <th></th>
+      </tr>
+      {% for piatto_carrello in carrello.piatti.all %}
+      <tr>
+        <td>{{ piatto_carrello.piatto.nome }}</td>
+        <td>
+          <form method="post" action="{% url 'takeaway:carrello_update' piatto_carrello.id %}">
+            {% csrf_token %}
+            <input type="number" name="quantita" value="{{ piatto_carrello.quantita }}" min="1" style="width:60px">
+            <button type="submit" class="btn btn-sm btn-secondary">Aggiorna</button>
+          </form>
+        </td>
+        <td>{{ piatto_carrello.piatto.prezzo }} €</td>
+        <td>{{ piatto_carrello.subtotale }} €</td>
+        <td>
+          <a href="{% url 'takeaway:carrello_remove' piatto_carrello.piatto.pk %}" class="btn btn-sm btn-danger">Rimuovi</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <p><strong>Totale: {{ carrello.totale }} €</strong></p>
+    <a href="{% url 'takeaway:checkout' %}" class="btn btn-sm btn-secondary">Procedi al checkout</a>
+
+  {% else %}
+    <p>Il carrello è vuoto.</p>
+  {% endif %}
+
+{% endblock %}

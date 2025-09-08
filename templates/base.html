@@ -1,0 +1,71 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Wasabi — Ristorante Giapponese{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- CSS personalizzato -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'home' %}">🍣 Wasabi</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:piatti' %}">Menu</a></li>
+
+          {% if user.is_staff %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'signup_dipendente' %}">Registrata dipendente</a></li>
+          {% endif %}
+
+          {% if "Clienti" in user.groups.all.0.name %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:carrello' %}">Carrello</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:ordini' %}">I miei Ordini</a></li>
+          {% endif %}
+        </ul>
+
+        <ul class="navbar-nav ms-auto">
+
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <form method="post" action="{% url 'logout' %}" class="d-inline logout-form">
+                {% csrf_token %}
+                <button type="submit" class="nav-link logout-button">Logout</button>
+              </form>
+            </li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'signup_cliente' %}">Registrati</a></li>
+          {% endif %}
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenuto principale -->
+  <main class="container py-4 flex-fill">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-light text-center py-3 mt-4">
+    <p class="mb-0">&copy; 2025 Wasabi — Ristorante Giapponese. Tutti i diritti riservati.</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

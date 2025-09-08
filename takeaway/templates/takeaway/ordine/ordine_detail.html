@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Ordine #{{ ordine.id }} — Wasabi{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <h2 class="mb-4">Dettaglio Ordine #{{ ordine.id }}</h2>
+    <p>Stato: {{ ordine.get_stato_display }}</p>
+    <p>Ritiro: {{ ordine.orario_ritiro|date:"d/m/Y H:i" }}</p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Piatto</th>
+                <th>Quantità</th>
+                <th>Prezzo Unitario</th>
+                <th>Subtotale</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for piatto in ordine.piatti.all %}
+            <tr>
+                <td>{{ piatto.piatto.nome }}</td>
+                <td>{{ piatto.quantita }}</td>
+                <td>{{ piatto.prezzo_unitario|floatformat:2 }} &euro;</td>
+                <td>{{ piatto.subtotale|floatformat:2 }} &euro;</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="text-end">Totale</th>
+                <th>{{ ordine.totale|floatformat:2 }} &euro;</th>
+            </tr>
+        </tfoot>
+    </table>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center">
+        <h1 class="display-4 mb-3">🍣 Wasabi Takeaway</h1>
+        <p class="lead mb-4">
+            Benvenuti da Wasabi!<br>
+            Ordina i tuoi piatti preferiti direttamente online e ritirali comodamente nel nostro ristorante.
+        </p>
+
+        <img src="{% static 'imgs/ristorante_banner.jpg' %}" alt="Wasabi Takeaway" class="img-fluid rounded" style="max-width:400px;">
+    </div>
+</div>
+{% endblock %}
