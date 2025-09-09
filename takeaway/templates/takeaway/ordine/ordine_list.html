@@ -30,9 +30,19 @@
               </a>
 
               <div class="d-flex flex-column align-items-end ms-3">
-                  <div>
-                      Totale: {{ ordine.totale|floatformat:2 }} &euro;
-                  </div>
+
+                  {% if ordine.sconto > 0 %}
+                    <div style="color: black; text-decoration: line-through; text-decoration-color: red;"">
+                        Totale: {{ ordine.totale|floatformat:2 }} &euro;
+                    </div>
+                    <div>
+                        Totale scontato: {{ ordine.totale_scontato|floatformat:2 }} &euro;
+                    </div>
+                  {% else %}
+                    <div>
+                        Totale: {{ ordine.totale|floatformat:2 }} &euro;
+                    </div>
+                  {% endif %}
 
                   <div class="d-flex gap-2 mt-1">
                       {% if "Dipendenti" in user.groups.all.0.name %}

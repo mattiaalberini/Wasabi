@@ -21,6 +21,27 @@
         {% endfor %}
     </ul>
 
+    <li class="list-group-item d-flex justify-content-between fw-bold">
+        Totale
+        <span>
+            {{ totale }} &euro;
+        </span>
+    </li>
+
+    <li class="list-group-item d-flex justify-content-between fw-bold">
+        sconto
+        <span>
+            {{ sconto }} &euro;
+        </span>
+    </li>
+
+    <li class="list-group-item d-flex justify-content-between fw-bold">
+        Totale scontato
+        <span>
+            {{ totale_scontato }} &euro;
+        </span>
+    </li>
+
     <form method="post">
         {% csrf_token %}
         {{ form|crispy }}

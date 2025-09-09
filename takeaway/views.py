@@ -129,6 +129,15 @@ def checkout(request):
     carrello = get_object_or_404(Carrello, cliente=request.user)
     piatti_carrello = PiattoCarrello.objects.filter(carrello=carrello)
 
+    carta_fedelta, created = CartaFedelta.objects.get_or_create(cliente=request.user)
+    soglia_sconto = SogliaSconto.objects.first()
+
+    # Controllo se è possibile applicare lo sconto
+    if carta_fedelta.punti > soglia_sconto.punti_richiesti:
+        sconto = soglia_sconto.valore_buono
+    else:
+        sconto = 0
+
     if not piatti_carrello.exists():
         # Carrello vuoto
         return redirect('takeaway:piatti')
@@ -136,17 +145,21 @@ def checkout(request):
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            ordine = form.save(commit=False)
+            ordine = form.save(commit=False) # Non salvo subito
             ordine.cliente = request.user
+            ordine.sconto = sconto
             ordine.save()
 
+            if sconto > 0:
+                carta_fedelta.rimuovi_punti(soglia_sconto.punti_richiesti)
+
             # Copia piatti dal carrello all'ordine
-            for item in piatti_carrello:
+            for piatto in piatti_carrello:
                 PiattoOrdine.objects.create(
                     ordine=ordine,
-                    piatto=item.piatto,
-                    quantita=item.quantita,
-                    prezzo_unitario=item.piatto.prezzo
+                    piatto=piatto.piatto,
+                    quantita=piatto.quantita,
+                    prezzo_unitario=piatto.piatto.prezzo
                 )
 
             # Svuota il carrello
@@ -156,9 +169,15 @@ def checkout(request):
     else:
         form = CheckoutForm()
 
+    totale = carrello.totale()
+    totale_scontato = totale - sconto
+
     return render(request, 'takeaway/carrello/checkout.html', {
         'form': form,
-        'piatti': piatti_carrello
+        'piatti': piatti_carrello,
+        'totale': totale,
+        'sconto': sconto,
+        'totale_scontato': totale_scontato
     })
 
 

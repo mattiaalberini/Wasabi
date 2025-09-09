@@ -38,6 +38,17 @@
                 <th colspan="3" class="text-end">Totale</th>
                 <th>{{ ordine.totale|floatformat:2 }} &euro;</th>
             </tr>
+
+            {% if ordine.sconto > 0 %}
+                <tr>
+                    <th colspan="3" class="text-end">Sconto</th>
+                    <th>{{ ordine.sconto|floatformat:2 }} &euro;</th>
+                </tr>
+                <tr>
+                    <th colspan="3" class="text-end">Totale scontato</th>
+                    <th>{{ ordine.totale_scontato|floatformat:2 }} &euro;</th>
+                </tr>
+            {% endif %}
         </tfoot>
     </table>
   </div>

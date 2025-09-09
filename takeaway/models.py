@@ -92,9 +92,13 @@ class Ordine(models.Model):
     orario_ritiro = models.DateTimeField()
     stato = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     creato_il = models.DateTimeField(auto_now_add=True)
+    sconto = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     def totale(self):
         return sum(piatto.subtotale() for piatto in self.piatti.all())
+
+    def totale_scontato(self):
+        return sum(piatto.subtotale() for piatto in self.piatti.all()) - self.sconto
 
     def __str__(self):
         return f"Ordine #{self.id} di {self.cliente.username}"
@@ -119,6 +123,10 @@ class CartaFedelta(models.Model):
 
     def aggiungi_punti(self, valore):
         self.punti += valore
+        self.save()
+
+    def rimuovi_punti(self, valore):
+        self.punti -= valore
         self.save()
 
     def __str__(self):
