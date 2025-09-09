@@ -20,7 +20,7 @@ procedere all’acquisto di essi, specificando l’orario in cui si presenterà 
 ritirare l’ordine. \
 Per ogni euro di spesa verranno aggiunti punti alla carta fedeltà del cliente. Al 
 raggiungimento di un certo quantitativo di punti sarà possibile ricevere un buono sconto da 
-utilizzare sul prossimo acquisto. \
+utilizzare sul prossimo acquisto.
 
 ### Dipendenti
 I dipendenti hanno la possibilità di aggiungere e rimuovere piatti dal menù, aggiungendo 
