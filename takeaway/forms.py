@@ -1,4 +1,6 @@
 from django import forms
+from django.utils import timezone
+
 from .models import Ordine, Piatto
 
 
@@ -8,6 +10,12 @@ class CheckoutForm(forms.ModelForm):
     class Meta:
         model = Ordine
         fields = ['orario_ritiro']
+
+    def clean_orario_ritiro(self):
+        orario = self.cleaned_data.get('orario_ritiro')
+        if orario < timezone.now():
+            raise forms.ValidationError("Non puoi scegliere una data/ora nel passato.")
+        return orario
 
 
 class PiattoForm(forms.ModelForm):

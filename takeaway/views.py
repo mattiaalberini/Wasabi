@@ -2,6 +2,7 @@ from django.core.exceptions import PermissionDenied
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -41,6 +42,7 @@ class PiattoListView(ListView):
 
         return sorted(queryset, key=lambda p: p.portata_ordine)
 
+    # Per mantenere selezionate le opzioni nel menu
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['portata_selezionata'] = self.request.GET.get('portata', 'tutti')
@@ -202,15 +204,55 @@ class OrdiniListView(GroupRequiredMixin, ListView):
     context_object_name = 'ordini'
 
     def get_queryset(self):
+        data = self.request.GET.get('data', 'futuri')
+        stato = self.request.GET.get('stato', 'pending')
+
+        print(data, stato)
+
         if self.request.user.groups.filter(name="Clienti").exists():
             # Se è un cliente -> mostro solo i suoi ordini
-            return Ordine.objects.filter(cliente=self.request.user).order_by('orario_ritiro')
+            queryset = Ordine.objects.filter(cliente=self.request.user)
         elif self.request.user.groups.filter(name="Dipendenti").exists():
             # Se è un dipendente -> mostro tutti gli ordini
-            return Ordine.objects.filter().order_by('orario_ritiro')
+            queryset = Ordine.objects.filter().order_by('orario_ritiro')
         else:
             raise PermissionDenied("Non hai accesso a questi ordini.")
 
+        if data == 'futuri':
+            queryset = queryset.filter(orario_ritiro__gt=timezone.now())
+        elif data == 'passati':
+            queryset = queryset.filter(orario_ritiro__lt=timezone.now())
+        else:
+            queryset = queryset.filter()
+
+        if stato != 'tutti':
+            queryset = queryset.filter(stato=stato)
+
+        return queryset.order_by('orario_ritiro')
+
+    # Per mantenere selezionate le opzioni nel menu
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['portata_selezionata'] = self.request.GET.get('data', 'futuri')
+        context['stato_selezionato'] = self.request.GET.get('stato', 'pending')
+        return context
+
+"""
+    def get_queryset(self):
+        queryset = Piatto.objects.all()
+
+        portata = self.request.GET.get('portata')
+        ingrediente = self.request.GET.get('ingrediente')
+
+        if portata and portata != 'tutti':
+            queryset = queryset.filter(portata=portata)
+
+        if ingrediente and ingrediente != 'tutti':
+            queryset = queryset.filter(ingredienti=ingrediente)
+
+        return sorted(queryset, key=lambda p: p.portata_ordine)
+
+"""
 
 class OrdineDelete(GroupRequiredMixin, DeleteView):
     group_required = ["Dipendenti"]
