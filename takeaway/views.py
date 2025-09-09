@@ -1,3 +1,6 @@
+from django.core.exceptions import PermissionDenied
+
+
 def client_group(user):
     return user.groups.filter(name='Clienti').exists()
 
@@ -9,7 +12,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.urls import reverse_lazy
 
-from takeaway.forms import CheckoutForm, PiattoForm
+from takeaway.forms import CheckoutForm, PiattoForm, OrdineForm
 from takeaway.models import *
 
 
@@ -41,6 +44,28 @@ class PiattoListView(ListView):
         context['portata_selezionata'] = self.request.GET.get('portata', 'tutti')
         context['ingrediente_selezionato'] = self.request.GET.get('ingrediente', 'tutti')
         return context
+
+
+class PiattoCreate(GroupRequiredMixin, CreateView):
+    group_required = ["Dipendenti"]
+    model = Piatto
+    form_class = PiattoForm
+    template_name = "takeaway/gestione_piatti/piatto_create.html"
+    success_url = reverse_lazy("takeaway:piatti")
+
+
+class PiattoDelete(GroupRequiredMixin, DeleteView):
+    group_required = ["Dipendenti"]
+    model = Piatto
+    success_url = reverse_lazy("takeaway:piatti")
+
+
+class PiattoUpdate(GroupRequiredMixin, UpdateView):
+    group_required = ["Dipendenti"]
+    model = Piatto
+    form_class = PiattoForm
+    template_name = "takeaway/gestione_piatti/piatto_update.html"
+    success_url = reverse_lazy("takeaway:piatti")
 
 
 # Aggiunge un piatto al carrello
@@ -142,46 +167,39 @@ def checkout_success(request):
 
 # Dettaglio ordine
 class OrdineDetailView(GroupRequiredMixin, DetailView):
-    group_required = ["Clienti"]
+    group_required = ["Clienti", "Dipendenti"]
     model = Ordine
     template_name = 'takeaway/ordine/ordine_detail.html'
     context_object_name = 'ordine'
 
-    def get_queryset(self):
-        # Mostra solo gli ordini dell'utente
-        return Ordine.objects.filter(cliente=self.request.user)
 
-
-# Mostra tutti gli ordini dell'utente, ordinati dal più recente
+# Lista ordini
 class OrdiniListView(GroupRequiredMixin, ListView):
-    group_required = ["Clienti"]
+    group_required = ["Clienti", "Dipendenti"]
     model = Ordine
     template_name = 'takeaway/ordine/ordine_list.html'
     context_object_name = 'ordini'
-    ordering = ['-creato_il']  # Dal più recente al più vecchio
 
     def get_queryset(self):
-        # Mostra solo gli ordini dell'utente
-        return Ordine.objects.filter(cliente=self.request.user)
+        if self.request.user.groups.filter(name="Clienti").exists():
+            # Se è un cliente -> mostro solo i suoi ordini
+            return Ordine.objects.filter(cliente=self.request.user).order_by('orario_ritiro')
+        elif self.request.user.groups.filter(name="Dipendenti").exists():
+            # Se è un dipendente -> mostro tutti gli ordini
+            return Ordine.objects.filter().order_by('orario_ritiro')
+        else:
+            raise PermissionDenied("Non hai accesso a questi ordini.")
 
 
-class PiattoCreate(GroupRequiredMixin, CreateView):
+class OrdineDelete(GroupRequiredMixin, DeleteView):
     group_required = ["Dipendenti"]
-    model = Piatto
-    form_class = PiattoForm
-    template_name = "takeaway/piatto_create.html"
-    success_url = reverse_lazy("takeaway:piatti")
+    model = Ordine
+    success_url = reverse_lazy("takeaway:ordini")
 
 
-class PiattoDelete(GroupRequiredMixin, DeleteView):
+class OrdineUpdate(GroupRequiredMixin, UpdateView):
     group_required = ["Dipendenti"]
-    model = Piatto
-    success_url = reverse_lazy("takeaway:piatti")
-
-
-class PiattoUpdate(GroupRequiredMixin, UpdateView):
-    group_required = ["Dipendenti"]
-    model = Piatto
-    form_class = PiattoForm
-    template_name = "takeaway/piatto_update.html"
-    success_url = reverse_lazy("takeaway:piatti")
+    model = Ordine
+    form_class = OrdineForm
+    template_name = "takeaway/ordine/ordine_update.html"
+    success_url = reverse_lazy("takeaway:ordini")

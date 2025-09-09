@@ -23,3 +23,9 @@ class PiattoForm(forms.ModelForm):
         if prezzo < 0:
             raise forms.ValidationError("Il prezzo non può essere negativo.")
         return prezzo
+
+
+class OrdineForm(forms.ModelForm):
+    class Meta:
+        model = Ordine
+        fields = ["stato"]

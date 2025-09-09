@@ -10,6 +10,10 @@
     <p>Stato: {{ ordine.get_stato_display }}</p>
     <p>Ritiro: {{ ordine.orario_ritiro|date:"d/m/Y H:i" }}</p>
 
+    {% if not "Clienti" in user.groups.all.0.name %}
+        <p>Cliente: {{ ordine.cliente }}</p>
+    {% endif %}
+
     <table class="table table-striped">
         <thead>
             <tr>

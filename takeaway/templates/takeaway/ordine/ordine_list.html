@@ -2,30 +2,64 @@
 
 {% load static %}
 
-{% block title %}I miei Ordini — Wasabi{% endblock %}
+{% block title %}
+    {% if "Clienti" in user.groups.all.0.name %}
+        I miei Ordini — Wasabi
+    {% else %}
+        Elenco Ordini — Wasabi
+    {% endif %}
+{% endblock %}
 
 {% block content %}
-  <h1 class="mb-4">I miei Ordini</h1>
+
+  {% if "Clienti" in user.groups.all.0.name %}
+    <h1 class="mb-4">I miei Ordini</h1>
+  {% else %}
+    <h1 class="mb-4">Elenco Ordini</h1>
+  {% endif %}
 
   {% if ordini %}
       <div class="list-group">
           {% for ordine in ordini %}
-          <a href="{% url 'takeaway:ordine' ordine.id %}" class="list-group-item list-group-item-action mb-2">
-              <div class="d-flex justify-content-between">
+          <div class="list-group-item mb-2 d-flex justify-content-between align-items-center">
+
+              <a href="{% url 'takeaway:ordine' ordine.id %}" class="text-decoration-none text-dark flex-grow-1">
+                  <strong>Ordine #{{ ordine.id }}</strong><br>
+                  Stato: {{ ordine.get_stato_display }}<br>
+                  Ritiro: {{ ordine.orario_ritiro|date:"d/m/Y H:i" }}
+              </a>
+
+              <div class="d-flex flex-column align-items-end ms-3">
                   <div>
-                      <strong>Ordine #{{ ordine.id }}</strong><br>
-                      Stato: {{ ordine.get_stato_display }}<br>
-                      Ritiro: {{ ordine.orario_ritiro|date:"d/m/Y H:i" }}
-                  </div>
-                  <div class="text-end">
                       Totale: {{ ordine.totale|floatformat:2 }} &euro;
                   </div>
+
+                  <div class="d-flex gap-2 mt-1">
+                      {% if "Dipendenti" in user.groups.all.0.name %}
+                        <a href="{% url 'takeaway:ordine_update' ordine.pk %}" class="btn btn-sm btn-outline-primary">✏️</a>
+
+                          <form method="post" action="{% url 'takeaway:ordine_delete' ordine.pk %}" style="display:inline;"
+                            onsubmit="return confirm('Vuoi davvero rimuovere l\'ordine {{ ordine.nome }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                          </form>
+                      {% endif %}
+
+                  </div>
               </div>
-          </a>
+
+          </div>
           {% endfor %}
       </div>
+
   {% else %}
-      <p>Non hai ancora effettuato ordini.</p>
+
+    {% if "Clienti" in user.groups.all.0.name %}
+        <p>Non hai ancora effettuato ordini.</p>
+    {% else %}
+        <p>Non ci sono ancora ordini.</p>
+    {% endif %}
+
   {% endif %}
 
 {% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <div class="mt-4 text-center">
+            <button type="submit" class="btn btn-success px-4">Salva</button>
+            <a href="{% url 'takeaway:ordini' %}" class="btn btn-outline-secondary ms-2">Annulla</a>
+        </div>
+    </form>
+{% endblock %}
