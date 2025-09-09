@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -39,6 +41,25 @@ class Piatto(models.Model):
     @property
     def portata_ordine(self):
         return ORDINE_PORTATA[self.portata]
+
+    # Rimozione foto
+    def save(self, *args, **kwargs):
+        # Se l'oggetto esiste già
+        try:
+            old_instance = Piatto.objects.get(pk=self.pk)
+            if old_instance.foto and old_instance.foto != self.foto:
+                if os.path.isfile(old_instance.foto.path):
+                    os.remove(old_instance.foto.path)
+        except Piatto.DoesNotExist:
+            pass  # Nuovo oggetto -> niente da cancellare
+
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Elimina la foto al momento del delete
+        if self.foto and os.path.isfile(self.foto.path):
+            os.remove(self.foto.path)
+        super().delete(*args, **kwargs)
 
 
 class Carrello(models.Model):

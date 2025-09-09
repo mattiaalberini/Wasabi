@@ -1,12 +1,15 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+def client_group(user):
+    return user.groups.filter(name='Clienti').exists()
+
+from braces.views import GroupRequiredMixin
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.urls import reverse_lazy
 
-from takeaway.forms import CheckoutForm
+from takeaway.forms import CheckoutForm, PiattoForm
 from takeaway.models import *
 
 
@@ -40,15 +43,8 @@ class PiattoListView(ListView):
         return context
 
 
-class PiattoCreate(CreateView):
-    model = Piatto
-    fields = "__all__"
-    template_name = "takeaway/piatto_create.html"
-    success_url = reverse_lazy("takeaway:piatti")
-
-
 # Aggiunge un piatto al carrello
-@login_required
+@user_passes_test(client_group)
 def aggiungi_al_carrello(request, id_piatto):
     piatto = get_object_or_404(Piatto, id=id_piatto)
     carrello, created = Carrello.objects.get_or_create(cliente=request.user)
@@ -61,8 +57,9 @@ def aggiungi_al_carrello(request, id_piatto):
 
     return redirect("takeaway:carrello")
 
+
 # Rimuove un piatto dal carrello
-@login_required
+@user_passes_test(client_group)
 def rimuovi_dal_carrello(request, id_piatto):
     piatto = get_object_or_404(Piatto, id=id_piatto)
     carrello = get_object_or_404(Carrello, cliente=request.user)
@@ -73,7 +70,7 @@ def rimuovi_dal_carrello(request, id_piatto):
 
 
 # Aggiorna quantità piatto nel carrello
-@login_required
+@user_passes_test(client_group)
 def aggiorna_nel_carrello(request, id_piatto):
     if request.method == "POST":
         piatto_carrello = get_object_or_404(PiattoCarrello, id=id_piatto, carrello__cliente=request.user)
@@ -93,13 +90,13 @@ def aggiorna_nel_carrello(request, id_piatto):
 
 
 # Mostra il carrello
-@login_required
+@user_passes_test(client_group)
 def visualizza_carrello(request):
     carrello, created = Carrello.objects.get_or_create(cliente=request.user)
     return render(request, "takeaway/carrello/carrello.html", {"carrello": carrello})
 
 
-@login_required
+@user_passes_test(client_group)
 def checkout(request):
     # Prendo il carrello dell'utente
     carrello = get_object_or_404(Carrello, cliente=request.user)
@@ -138,13 +135,14 @@ def checkout(request):
     })
 
 
-@login_required
+@user_passes_test(client_group)
 def checkout_success(request):
     return render(request, 'takeaway/carrello/checkout_success.html')
 
 
 # Dettaglio ordine
-class OrdineDetailView(LoginRequiredMixin, DetailView):
+class OrdineDetailView(GroupRequiredMixin, DetailView):
+    group_required = ["Clienti"]
     model = Ordine
     template_name = 'takeaway/ordine/ordine_detail.html'
     context_object_name = 'ordine'
@@ -155,7 +153,8 @@ class OrdineDetailView(LoginRequiredMixin, DetailView):
 
 
 # Mostra tutti gli ordini dell'utente, ordinati dal più recente
-class OrdiniListView(LoginRequiredMixin, ListView):
+class OrdiniListView(GroupRequiredMixin, ListView):
+    group_required = ["Clienti"]
     model = Ordine
     template_name = 'takeaway/ordine/ordine_list.html'
     context_object_name = 'ordini'
@@ -166,13 +165,23 @@ class OrdiniListView(LoginRequiredMixin, ListView):
         return Ordine.objects.filter(cliente=self.request.user)
 
 
-class PiattoDelete(DeleteView):
+class PiattoCreate(GroupRequiredMixin, CreateView):
+    group_required = ["Dipendenti"]
     model = Piatto
-    template_name = "takeaway/piatto_delete.html"
+    form_class = PiattoForm
+    template_name = "takeaway/piatto_create.html"
     success_url = reverse_lazy("takeaway:piatti")
 
-class PiattoUpdate(UpdateView):
+
+class PiattoDelete(GroupRequiredMixin, DeleteView):
+    group_required = ["Dipendenti"]
     model = Piatto
-    fields = ("descrizione", "prezzo")
+    success_url = reverse_lazy("takeaway:piatti")
+
+
+class PiattoUpdate(GroupRequiredMixin, UpdateView):
+    group_required = ["Dipendenti"]
+    model = Piatto
+    form_class = PiattoForm
     template_name = "takeaway/piatto_update.html"
     success_url = reverse_lazy("takeaway:piatti")

@@ -15,7 +15,6 @@ urlpatterns = [
     path('carrello/checkout_success/', checkout_success, name='checkout_success'),
     path('ordini/', OrdiniListView.as_view(), name='ordini'),
     path('ordine/<int:pk>/', OrdineDetailView.as_view(), name='ordine'),
-
     path("aggiungi_piatto", PiattoCreate.as_view(), name="piatto_create"),
     path("rimuovi_piatto/<int:pk>", PiattoDelete.as_view(), name="piatto_delete"),
     path("modifica_piatto/<int:pk>", PiattoUpdate.as_view(), name="piatto_update"),

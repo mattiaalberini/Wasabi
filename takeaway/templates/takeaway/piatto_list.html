@@ -7,7 +7,7 @@
 {% block content %}
   <h1 class="mb-4">Menu</h1>
 
-  <form method="get" id="filterForm" class="row g-2 mb-4">
+  <form method="get" id="filterForm" class="row g-2 mb-4 align-items-center">
     <div class="col-md-2">
       <select name="portata" class="form-select" onchange="document.getElementById('filterForm').submit()">
         <option value="tutti" {% if portata_selezionata == "tutti" %}selected{% endif %}>Tutte le portate</option>
@@ -27,7 +27,14 @@
         <option value="vegetariano" {% if ingrediente_selezionato == "vegetariano" %}selected{% endif %}>Vegetariano</option>
       </select>
     </div>
+
+    {% if "Dipendenti" in user.groups.all.0.name %}
+    <div class="col-md-auto ms-auto">
+      <a href="{% url 'takeaway:piatto_create' %}" class="btn btn-sm btn-success">Aggiungi piatto</a>
+    </div>
+    {% endif %}
   </form>
+
 
 
   {% if object_list %}
@@ -42,7 +49,7 @@
           {% endif %}
           <div class="card-body">
             <h5 class="card-title">{{ piatto.nome }}</h5>
-            <p class="card-text">{{ piatto.descrizione|truncatewords:20 }}</p>
+            <p class="card-text">{{ piatto.descrizione|truncatechars:40 }}</p>
             <p>
               <span class="badge bg-info text-dark">{{ piatto.get_portata_display }}</span>
               <span class="badge bg-secondary">{{ piatto.get_ingredienti_display }}</span>
@@ -57,8 +64,16 @@
             {% endif %}
 
             {% if "Dipendenti" in user.groups.all.0.name %}
-              <a href="{% url 'takeaway:piatto_update' piatto.pk %}" class="btn btn-sm btn-outline-primary">✏️</a>
-              <a href="{% url 'takeaway:piatto_delete' piatto.pk %}" class="btn btn-sm btn-outline-danger">🗑️</a>
+              <div class="d-flex justify-content-end gap-2">
+                <a href="{% url 'takeaway:piatto_update' piatto.pk %}" class="btn btn-sm btn-outline-primary">✏️</a>
+
+                <form method="post" action="{% url 'takeaway:piatto_delete' piatto.pk %}" style="display:inline;"
+                  onsubmit="return confirm('Vuoi davvero rimuovere {{ piatto.nome }} dal menu?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                </form>
+
+              </div>
             {% endif %}
           </div>
         </div>
