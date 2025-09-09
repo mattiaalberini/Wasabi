@@ -23,4 +23,8 @@ urlpatterns = [
     path('ordini/', OrdiniListView.as_view(), name='ordini'),
     path('ordini/rimuovi/<int:pk>', OrdineDelete.as_view(), name='ordine_delete'),
     path('ordini/modifica/<int:pk>', OrdineUpdate.as_view(), name='ordine_update'),
+
+    path('carta_fedelta/', visualizza_carta_fedelta, name='carta_fedelta'),
+    path('soglia_sconto/', visualizza_soglia_buono, name='soglia_sconto'),
+    path('soglia_sconto/modifica/', aggiorna_soglia_buono, name='soglia_sconto_update'),
 ]

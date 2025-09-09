@@ -31,10 +31,12 @@
           {% endif %}
 
           {% if "Clienti" in user.groups.all.0.name %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:ordini' %}">I miei Ordini</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:carrello' %}">Carrello</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:ordini' %}">I miei Ordini</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:carta_fedelta' %}">Carta Fedeltà</a></li>
           {% elif "Dipendenti" in user.groups.all.0.name %}
             <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:ordini' %}">Ordini</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'takeaway:soglia_sconto' %}">Sconto</a></li>
           {% endif %}
         </ul>
 

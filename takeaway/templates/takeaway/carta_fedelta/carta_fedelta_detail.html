@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Carta Fedeltà — Wasabi{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-md-6">
+
+      <div class="card shadow-lg border-0 rounded-3 card h-100 d-flex justify-content-center align-items-center">
+        <div class="card-body text-center p-4">
+          <h2 class="mb-3">Carta fedeltà di {{ request.user.username }}</h2>
+
+          <h4 class="mb-4"></h4>
+
+          <p class="fs-4 fw-bold text-success">
+            Punti accumulati: {{ carta_fedelta.punti }}
+          </p>
+
+          {% if punti_rimanenti <= 0 %}
+            <div class="alert mt-3">
+              🎉 Complimenti! Hai diritto a un premio di {{ soglia_sconto.valore_buono }}€ sul tuo prossimo ordine!
+            </div>
+          {% else %}
+            <p>
+              Ti mancano {{ punti_rimanenti }} punti per il prossimo premio ({{ soglia_sconto.valore_buono }}€).
+            </p>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

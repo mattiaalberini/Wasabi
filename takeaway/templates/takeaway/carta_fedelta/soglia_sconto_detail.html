@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Soglia Sconto — Wasabi{% endblock %}
+
+{% block content %}
+<div class="container my-5 d-flex justify-content-center">
+    <div class="card shadow-sm" style="max-width: 600px; width: 100%; border-radius: 0.5rem;">
+        <div class="card-body p-5">
+            <h2 class="card-title mb-5 text-center fs-1">Soglia Sconto</h2>
+
+            <div class="mb-3 text-center">
+                <p class="mb-2 fs-5">Punti richiesti: {{ soglia.punti_richiesti }}</p>
+                <p class="mb-0 fs-5">Valore del buono: {{ soglia.valore_buono }}€</p>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'takeaway:soglia_sconto_update' %}" class="btn btn-outline-secondary btn-lg px-5">
+                    Modifica Soglia
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

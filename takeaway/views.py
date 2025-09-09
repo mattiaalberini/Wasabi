@@ -1,9 +1,4 @@
 from django.core.exceptions import PermissionDenied
-
-
-def client_group(user):
-    return user.groups.filter(name='Clienti').exists()
-
 from braces.views import GroupRequiredMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
@@ -12,18 +7,25 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.urls import reverse_lazy
 
-from takeaway.forms import CheckoutForm, PiattoForm, OrdineForm
+from takeaway.forms import CheckoutForm, PiattoForm, OrdineForm, SogliaScontoForm
 from takeaway.models import *
+
+
+def clienti_group(user):
+    return user.groups.filter(name='Clienti').exists()
+
+def dipendenti_group(user):
+    return user.groups.filter(name='Dipendenti').exists()
 
 
 class PiattoDetail(DetailView):
     model = Piatto
-    template_name = "takeaway/piatto_detail.html"
+    template_name = "takeaway/piatto/piatto_detail.html"
 
 
 class PiattoListView(ListView):
     model = Piatto
-    template_name = "takeaway/piatto_list.html"
+    template_name = "takeaway/piatto/piatto_list.html"
 
     def get_queryset(self):
         queryset = Piatto.objects.all()
@@ -50,7 +52,7 @@ class PiattoCreate(GroupRequiredMixin, CreateView):
     group_required = ["Dipendenti"]
     model = Piatto
     form_class = PiattoForm
-    template_name = "takeaway/gestione_piatti/piatto_create.html"
+    template_name = "takeaway/piatto/piatto_create.html"
     success_url = reverse_lazy("takeaway:piatti")
 
 
@@ -64,12 +66,12 @@ class PiattoUpdate(GroupRequiredMixin, UpdateView):
     group_required = ["Dipendenti"]
     model = Piatto
     form_class = PiattoForm
-    template_name = "takeaway/gestione_piatti/piatto_update.html"
+    template_name = "takeaway/piatto/piatto_update.html"
     success_url = reverse_lazy("takeaway:piatti")
 
 
 # Aggiunge un piatto al carrello
-@user_passes_test(client_group)
+@user_passes_test(clienti_group)
 def aggiungi_al_carrello(request, id_piatto):
     piatto = get_object_or_404(Piatto, id=id_piatto)
     carrello, created = Carrello.objects.get_or_create(cliente=request.user)
@@ -84,7 +86,7 @@ def aggiungi_al_carrello(request, id_piatto):
 
 
 # Rimuove un piatto dal carrello
-@user_passes_test(client_group)
+@user_passes_test(clienti_group)
 def rimuovi_dal_carrello(request, id_piatto):
     piatto = get_object_or_404(Piatto, id=id_piatto)
     carrello = get_object_or_404(Carrello, cliente=request.user)
@@ -95,7 +97,7 @@ def rimuovi_dal_carrello(request, id_piatto):
 
 
 # Aggiorna quantità piatto nel carrello
-@user_passes_test(client_group)
+@user_passes_test(clienti_group)
 def aggiorna_nel_carrello(request, id_piatto):
     if request.method == "POST":
         piatto_carrello = get_object_or_404(PiattoCarrello, id=id_piatto, carrello__cliente=request.user)
@@ -115,13 +117,13 @@ def aggiorna_nel_carrello(request, id_piatto):
 
 
 # Mostra il carrello
-@user_passes_test(client_group)
+@user_passes_test(clienti_group)
 def visualizza_carrello(request):
     carrello, created = Carrello.objects.get_or_create(cliente=request.user)
     return render(request, "takeaway/carrello/carrello.html", {"carrello": carrello})
 
 
-@user_passes_test(client_group)
+@user_passes_test(clienti_group)
 def checkout(request):
     # Prendo il carrello dell'utente
     carrello = get_object_or_404(Carrello, cliente=request.user)
@@ -160,7 +162,7 @@ def checkout(request):
     })
 
 
-@user_passes_test(client_group)
+@user_passes_test(clienti_group)
 def checkout_success(request):
     return render(request, 'takeaway/carrello/checkout_success.html')
 
@@ -203,3 +205,54 @@ class OrdineUpdate(GroupRequiredMixin, UpdateView):
     form_class = OrdineForm
     template_name = "takeaway/ordine/ordine_update.html"
     success_url = reverse_lazy("takeaway:ordini")
+
+    def form_valid(self, form):
+        ordine = form.save(commit=False)
+
+        # se lo stato diventa 'completed' assegna punti
+        if ordine.stato == "completed":
+            punti = int(ordine.totale())  # 1 punto per ogni euro
+            carta, created = CartaFedelta.objects.get_or_create(cliente=ordine.cliente)
+            carta.aggiungi_punti(punti)
+
+        ordine.save()
+        return redirect("takeaway:ordini")
+
+
+@user_passes_test(clienti_group)
+def visualizza_carta_fedelta(request):
+    carta_fedelta, created = CartaFedelta.objects.get_or_create(cliente=request.user)
+    soglia_sconto = SogliaSconto.objects.first()
+    punti_rimanenti = soglia_sconto.punti_richiesti - carta_fedelta.punti
+
+    return render(request, "takeaway/carta_fedelta/carta_fedelta_detail.html", {"carta_fedelta": carta_fedelta,
+                                                                                "soglia_sconto": soglia_sconto, "punti_rimanenti": punti_rimanenti})
+
+
+# Dettaglio soglia sconto
+@user_passes_test(dipendenti_group)
+def visualizza_soglia_buono(request):
+    soglia, created = SogliaSconto.objects.get_or_create()  # Unica soglia
+    return render(request, 'takeaway/carta_fedelta/soglia_sconto_detail.html', {'soglia': soglia})
+
+
+# Modifica soglia sconto
+@user_passes_test(dipendenti_group)
+def aggiorna_soglia_buono(request):
+    soglia = SogliaSconto.objects.first()  # unica soglia
+
+    if request.method == 'POST':
+        form = SogliaScontoForm(request.POST)
+        if form.is_valid():
+            soglia.punti_richiesti = form.cleaned_data['punti_richiesti']
+            soglia.valore_buono = form.cleaned_data['valore_buono']
+            soglia.save()
+            return redirect('takeaway:soglia_sconto')
+    else:
+        # Precompilo i campi
+        form = SogliaScontoForm(initial={
+            'punti_richiesti': soglia.punti_richiesti,
+            'valore_buono': soglia.valore_buono
+        })
+
+    return render(request, 'takeaway/carta_fedelta/soglia_sconto_update.html', {'form': form})

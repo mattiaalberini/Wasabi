@@ -111,3 +111,23 @@ class PiattoOrdine(models.Model):
 
     def __str__(self):
         return f"{self.quantita} × {self.piatto.nome} (Ordine #{self.ordine.id})"
+
+
+class CartaFedelta(models.Model):
+    cliente = models.OneToOneField(User, on_delete=models.CASCADE, related_name="carta_fedelta")
+    punti = models.PositiveIntegerField(default=0)
+
+    def aggiungi_punti(self, valore):
+        self.punti += valore
+        self.save()
+
+    def __str__(self):
+        return f"Carta {self.cliente.username} - {self.punti} punti"
+
+
+class SogliaSconto(models.Model):
+    punti_richiesti = models.PositiveIntegerField(default=100)
+    valore_buono = models.DecimalField(max_digits=6, decimal_places=2, default=5)
+
+    def __str__(self):
+        return f"{self.punti_richiesti} punti -> Buono da €{self.valore_buono}"
