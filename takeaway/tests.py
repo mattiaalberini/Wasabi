@@ -141,8 +141,7 @@ class PiattoCreateTest(TestCase):
     def setUp(self):
         # Utenti
         gruppo_clienti, created = Group.objects.get_or_create(name='Clienti')
-        gruppo_dipendenti, created = Group.objects.get_or_create(name='Dipendenti'
-                                                                 )
+        gruppo_dipendenti, created = Group.objects.get_or_create(name='Dipendenti')
         self.cliente = User.objects.create_user(username='cliente', password='prova123')
         self.cliente.groups.add(gruppo_clienti)
 

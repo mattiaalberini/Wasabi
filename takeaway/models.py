@@ -108,7 +108,7 @@ class PiattoOrdine(models.Model):
     ordine = models.ForeignKey(Ordine, related_name="piatti", on_delete=models.CASCADE)
     piatto = models.ForeignKey(Piatto, on_delete=models.CASCADE)
     quantita = models.PositiveIntegerField(default=1)
-    prezzo_unitario = models.DecimalField(max_digits=6, decimal_places=2)
+    prezzo_unitario = models.DecimalField(max_digits=6, decimal_places=2) # Anche se cambia il prezzo del piatto, nell'ordine rimane uguale
 
     def subtotale(self):
         return self.prezzo_unitario * self.quantita
