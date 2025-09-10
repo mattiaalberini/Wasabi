@@ -1,6 +1,7 @@
 import os
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 
 ORDINE_PORTATA = {
@@ -102,6 +103,17 @@ class Ordine(models.Model):
 
     def __str__(self):
         return f"Ordine #{self.id} di {self.cliente.username}"
+
+    def clean(self):
+        # Se l'ordine è già salvato e non era più "pending"
+        if self.pk:
+            stato_originale = Ordine.objects.get(pk=self.pk).stato
+            if stato_originale != "pending" and self.stato != stato_originale:
+                raise ValidationError("Lo stato non può essere più modificato.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Fa scattare clean() prima di salvare
+        super().save(*args, **kwargs)
 
 
 class PiattoOrdine(models.Model):

@@ -27,8 +27,9 @@ class PiattoForm(forms.ModelForm):
         nome = self.cleaned_data.get('nome')
         existing_piatto = Piatto.objects.filter(nome=nome)
 
-        if existing_piatto:
-            raise forms.ValidationError("Piatto già presente nel menu.")
+        if not self.instance.pk: # Controllo effettuato solo alla creazione
+            if existing_piatto:
+                raise forms.ValidationError("Piatto già presente nel menu.")
         return nome
 
     def clean_prezzo(self):

@@ -135,8 +135,10 @@ def checkout(request):
     soglia_sconto = SogliaSconto.objects.first()
 
     # Controllo se è possibile applicare lo sconto
-    if carta_fedelta.punti > soglia_sconto.punti_richiesti:
+    if carta_fedelta.punti >= soglia_sconto.punti_richiesti:
         sconto = soglia_sconto.valore_buono
+        if sconto > carrello.totale():
+            sconto = carrello.totale()
     else:
         sconto = 0
 
