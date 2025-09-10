@@ -33,3 +33,7 @@ specificare il valore di esso.
 ### Admin 
 Utente che permette di creare i vari utenti per i dipendenti. Un dipendente non può crearsi 
 l’utente da solo. 
+
+## Esecuzione
+1. `pipenv shell`
+2. `python manage.py runserver`
