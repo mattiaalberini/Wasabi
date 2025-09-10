@@ -258,7 +258,7 @@ class OrdineUpdate(GroupRequiredMixin, UpdateView):
 
         # se lo stato diventa 'completed' assegna punti
         if ordine.stato == "completed":
-            punti = int(ordine.totale())  # 1 punto per ogni euro
+            punti = int(ordine.totale_scontato())  # 1 punto per ogni euro
             carta, created = CartaFedelta.objects.get_or_create(cliente=ordine.cliente)
             carta.aggiungi_punti(punti)
 
