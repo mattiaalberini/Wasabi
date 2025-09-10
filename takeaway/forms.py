@@ -23,6 +23,14 @@ class PiattoForm(forms.ModelForm):
         model = Piatto
         fields = ["nome", "descrizione", "prezzo", "portata", "ingredienti", "foto"]
 
+    def clean_nome(self):
+        nome = self.cleaned_data.get('nome')
+        existing_piatto = Piatto.objects.filter(nome=nome)
+
+        if existing_piatto:
+            raise forms.ValidationError("Piatto già presente nel menu.")
+        return nome
+
     def clean_prezzo(self):
         prezzo = self.cleaned_data.get('prezzo')
         if prezzo < 0:

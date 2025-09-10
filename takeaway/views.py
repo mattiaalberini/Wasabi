@@ -237,22 +237,6 @@ class OrdiniListView(GroupRequiredMixin, ListView):
         context['stato_selezionato'] = self.request.GET.get('stato', 'pending')
         return context
 
-"""
-    def get_queryset(self):
-        queryset = Piatto.objects.all()
-
-        portata = self.request.GET.get('portata')
-        ingrediente = self.request.GET.get('ingrediente')
-
-        if portata and portata != 'tutti':
-            queryset = queryset.filter(portata=portata)
-
-        if ingrediente and ingrediente != 'tutti':
-            queryset = queryset.filter(ingredienti=ingrediente)
-
-        return sorted(queryset, key=lambda p: p.portata_ordine)
-
-"""
 
 class OrdineDelete(GroupRequiredMixin, DeleteView):
     group_required = ["Dipendenti"]
