@@ -37,3 +37,5 @@ l’utente da solo.
 ## Esecuzione
 1. `pipenv shell`
 2. `python manage.py runserver`
+
+Test
